@@ -1,4 +1,5 @@
 import type { NextPage } from 'next'
+import web3 from 'web3'
 
 declare global {
   interface Window {
@@ -14,6 +15,7 @@ const Home: NextPage = () => {
   const tokenImage = 'https://ipfs.io/ipfs/QmRmW88atatrZZvjKzvoPEMgxbVqyBnMZoDeSj4x154y2c';
 
   const addToken = async () => {
+    await checkNetwork();
     try {
       const wasAdded = await window.ethereum.request({
         method: 'wallet_watchAsset',
@@ -37,6 +39,26 @@ const Home: NextPage = () => {
     }
   }
 
+  const chainId = 80001; // chain id for polygon testnet
+  const networkName = 'Matic Mumbai';
+  const rpcUrls = ['https://rpc-mumbai.maticvigil.com/'];
+
+  const checkNetwork = async () => {
+    if (window.ethereum.networkVersion !== chainId) {
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [
+          {
+            chainName: networkName,
+            chainId: web3.utils.toHex(chainId),
+            nativeCurrency: { name: 'MATIC', decimals: 18, symbol: 'MATIC' },
+            rpcUrls: rpcUrls,
+          }
+        ]
+      });
+    }
+  }
+
   return (
     <div
       style={{
@@ -49,7 +71,22 @@ const Home: NextPage = () => {
       }}
     >
       <button
+        onClick={checkNetwork}
+        style={{
+          width: '200px',
+          padding: '10px',
+          borderRadius: '5px',
+          margin: '10px',
+        }}
+      >Check Network</button>
+      <button
         onClick={addToken}
+        style={{
+          width: '200px',
+          padding: '10px',
+          borderRadius: '5px',
+          margin: '10px',
+        }}
       >Add Token</button>
     </div>
   )
